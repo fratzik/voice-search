@@ -1,5 +1,6 @@
 const recordButton = document.getElementById('recordButton');
 const audioPlayer = document.getElementById('audioPlayer');
+const transcriptContainer = document.getElementById('transcriptContainer');
 const backendUrl = 'http://localhost:8000/backend/index.php'; // Placeholder
 
 let isRecording = false;
@@ -55,6 +56,7 @@ function sendAudioToBackend(audioBlob) {
     })
     .then(response => response.json())
     .then(data => {
+        transcriptContainer.textContent = data.transcript;
         if (data.success) {
             const deepgramTtsUrl = 'https://api.deepgram.com/v1/speak?model=aura-asteria-en';
 

@@ -50,20 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['audio'])) {
             // Keywords found, generate a response
             $responseText = 'I found results for your search about ' . implode(', ', $foundKeywords) . '.';
 
-            // For now, we'll just send back a success message.
-            // In the next step, we'll integrate with Deepgram's TTS.
-            echo json_encode(['success' => true, 'message' => $responseText]);
+            echo json_encode(['success' => true, 'message' => $responseText, 'transcript' => $transcript]);
 
         } else {
             // No keywords found
-            echo json_encode(['success' => false, 'message' => 'I could not identify a search query in your speech.']);
+            echo json_encode(['success' => false, 'message' => 'I could not identify a search query in your speech.', 'transcript' => $transcript]);
         }
     } else {
         // Transcription failed
-        echo json_encode(['success' => false, 'message' => 'Transcription failed.']);
+        echo json_encode(['success' => false, 'message' => 'Transcription failed.', 'transcript' => '']);
     }
 } else {
     // No audio file received
-    echo json_encode(['success' => false, 'message' => 'No audio file received.']);
+    echo json_encode(['success' => false, 'message' => 'No audio file received.', 'transcript' => '']);
 }
 ?>
