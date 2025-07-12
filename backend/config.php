@@ -1,0 +1,3 @@
+<?php
+define('DEEPGRAM_API_KEY', 'YOUR_DEEPGRAM_API_KEY');
+?>
