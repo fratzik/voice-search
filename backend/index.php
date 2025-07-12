@@ -2,19 +2,16 @@
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
 
+require_once 'config.php';
+require_once 'conversation.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['audio'])) {
     $audioFile = $_FILES['audio'];
-
-    require_once 'config.php';
     $deepgramApiKey = DEEPGRAM_API_KEY;
-
-    // Deepgram API URL
     $deepgramApiUrl = 'https://api.deepgram.com/v1/listen';
 
-    // Prepare the request data
     $postData = file_get_contents($audioFile['tmp_name']);
 
-    // Set up the HTTP request headers
     $options = [
         'http' => [
             'method' => 'POST',
@@ -24,44 +21,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['audio'])) {
         ],
     ];
 
-    // Create the stream context
     $context = stream_context_create($options);
-
-    // Send the request to Deepgram
     $response = file_get_contents($deepgramApiUrl, false, $context);
-
-    // Decode the response
     $responseData = json_decode($response, true);
 
-    // Check for transcription
     if (isset($responseData['results']['channels'][0]['alternatives'][0]['transcript'])) {
         $transcript = $responseData['results']['channels'][0]['alternatives'][0]['transcript'];
+        process_user_response($transcript);
+        $next_question = get_next_question();
 
-        // Check for real estate keywords
-        $keywords = ['house', 'apartment', 'rent', 'buy', 'property'];
-        $foundKeywords = [];
-        foreach ($keywords as $keyword) {
-            if (stripos($transcript, $keyword) !== false) {
-                $foundKeywords[] = $keyword;
-            }
-        }
-
-        if (count($foundKeywords) > 0) {
-            // Keywords found, generate a response
-            $responseText = 'I found results for your search about ' . implode(', ', $foundKeywords) . '.';
-
-            echo json_encode(['success' => true, 'message' => $responseText, 'transcript' => $transcript]);
-
+        if ($next_question === null) {
+            $properties = search_properties();
+            echo json_encode(['success' => true, 'properties' => $properties, 'transcript' => $transcript]);
         } else {
-            // No keywords found
-            echo json_encode(['success' => false, 'message' => 'I could not identify a search query in your speech.', 'transcript' => $transcript]);
+            echo json_encode(['success' => true, 'message' => $next_question, 'transcript' => $transcript]);
         }
     } else {
-        // Transcription failed
         echo json_encode(['success' => false, 'message' => 'Transcription failed.', 'transcript' => '']);
     }
 } else {
-    // No audio file received
     echo json_encode(['success' => false, 'message' => 'No audio file received.', 'transcript' => '']);
 }
 ?>
