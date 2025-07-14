@@ -117,4 +117,4 @@ function displayProperties(properties) {
 }
 
 // Initial message
-playAndDisplayAgentMessage("Hello! I'm your real estate assistant. Are you looking to buy or rent?");
+playAndDisplayAgentMessage("Welcome to FGRealty! How can I help you today?");
